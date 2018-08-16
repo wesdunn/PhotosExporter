@@ -42,6 +42,7 @@ let exportPhotosOfMediaGroupFilter = { (mediaGroup: MLMediaGroup) -> Bool in
         !("com.apple.Photos.PlacesAlbum" == mediaGroup.typeIdentifier && mediaGroup.parent?.typeIdentifier == "com.apple.Photos.RootGroup")
 }
 
+
 //////////////////////////////////////////////////////////////////////////////////////
 // Export to local disk in simple export mode (snapshot folder, with hard links
 // to the original files to save disk space)
@@ -65,6 +66,16 @@ func PerformIncrementalExport() {
     externalDiskPhotosExporter.exportMediaGroupFilter = exportMediaGroupFilter
     externalDiskPhotosExporter.exportPhotosOfMediaGroupFilter = exportPhotosOfMediaGroupFilter
     externalDiskPhotosExporter.exportPhotos()
+}
+
+
+if mode == "snapshot" {
+    PerformSnapshotExport()
+} else if mode == "incremental" {
+    PerformIncrementalExport()
+} else {
+    writeToStdError(str: "the mode: \(mode) is not supported. please choose snapshot or incremental")
+    exit(EXIT_FAILURE)
 }
 
 exit(EXIT_SUCCESS)
