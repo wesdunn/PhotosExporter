@@ -9,6 +9,26 @@
 import Foundation
 import MediaLibrary
 
+func writeToStdError(str: String) {
+    let handle = FileHandle.standardError
+    
+    if let data = str.data(using: String.Encoding.utf8) {
+        handle.write(data)
+    }
+}
+
+if (CommandLine.arguments.count < 3) {
+    writeToStdError(str: "Expected 2 arguments!\n")
+    writeToStdError(str: "Usage: PhotosExporter <mode> <destDir>")
+    exit(EXIT_FAILURE)
+}
+
+let mode = CommandLine.arguments[1]
+let destDirectory = CommandLine.arguments[2]
+
+print("args: mode: \(mode), destDir: \(destDirectory)")
+
+
 // define which media groups should be exported
 let exportMediaGroupFilter = { (mediaGroup: MLMediaGroup) -> Bool in
     // export all media groups
@@ -22,25 +42,29 @@ let exportPhotosOfMediaGroupFilter = { (mediaGroup: MLMediaGroup) -> Bool in
         !("com.apple.Photos.PlacesAlbum" == mediaGroup.typeIdentifier && mediaGroup.parent?.typeIdentifier == "com.apple.Photos.RootGroup")
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////
 // Export to local disk in simple export mode (snapshot folder, with hard links
 // to the original files to save disk space)
 //////////////////////////////////////////////////////////////////////////////////////
+func PerformSnapshotExport() {
 
-// define the target path (this is the root path for your backups)
-let localPhotosExporter = SnapshotPhotosExporter.init(targetPath: "/Users/andreas/Pictures/Fotos Library export")
-localPhotosExporter.exportMediaGroupFilter = exportMediaGroupFilter
-localPhotosExporter.exportPhotosOfMediaGroupFilter = exportPhotosOfMediaGroupFilter
-localPhotosExporter.exportPhotos()
+    // define the target path (this is the root path for your backups)
+    let localPhotosExporter = SnapshotPhotosExporter.init(targetPath: destDirectory)
+    localPhotosExporter.exportMediaGroupFilter = exportMediaGroupFilter
+    localPhotosExporter.exportPhotosOfMediaGroupFilter = exportPhotosOfMediaGroupFilter
+    localPhotosExporter.exportPhotos()
+}
 
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Export to external disk in "time machine" mode (one folder for each export date)
 //////////////////////////////////////////////////////////////////////////////////////
+func PerformIncrementalExport() {
+    // define the target path (this is the root path for your backups)
+    let externalDiskPhotosExporter = IncrementalPhotosExporter.init(targetPath: destDirectory)
+    externalDiskPhotosExporter.exportMediaGroupFilter = exportMediaGroupFilter
+    externalDiskPhotosExporter.exportPhotosOfMediaGroupFilter = exportPhotosOfMediaGroupFilter
+    externalDiskPhotosExporter.exportPhotos()
+}
 
-// define the target path (this is the root path for your backups)
-let externalDiskPhotosExporter = IncrementalPhotosExporter.init(targetPath: "/Volumes/WD-4TB/Fotos Library export")
-externalDiskPhotosExporter.exportMediaGroupFilter = exportMediaGroupFilter
-externalDiskPhotosExporter.exportPhotosOfMediaGroupFilter = exportPhotosOfMediaGroupFilter
-externalDiskPhotosExporter.exportPhotos()
+exit(EXIT_SUCCESS)
