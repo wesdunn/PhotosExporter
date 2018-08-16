@@ -47,14 +47,14 @@ let exportPhotosOfMediaGroupFilter = { (mediaGroup: MLMediaGroup) -> Bool in
 // Export to local disk in simple export mode (snapshot folder, with hard links
 // to the original files to save disk space)
 //////////////////////////////////////////////////////////////////////////////////////
-func PerformSnapshotExport() {
 
-    // define the target path (this is the root path for your backups)
-    let localPhotosExporter = SnapshotPhotosExporter.init(targetPath: destDirectory)
-    localPhotosExporter.exportMediaGroupFilter = exportMediaGroupFilter
-    localPhotosExporter.exportPhotosOfMediaGroupFilter = exportPhotosOfMediaGroupFilter
-    localPhotosExporter.exportPhotos()
-}
+
+// define the target path (this is the root path for your backups)
+let localPhotosExporter = SnapshotPhotosExporter.init(targetPath: destDirectory)
+localPhotosExporter.exportMediaGroupFilter = exportMediaGroupFilter
+localPhotosExporter.exportPhotosOfMediaGroupFilter = exportPhotosOfMediaGroupFilter
+localPhotosExporter.exportPhotos()
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -68,14 +68,5 @@ func PerformIncrementalExport() {
     externalDiskPhotosExporter.exportPhotos()
 }
 
-
-if mode == "snapshot" {
-    PerformSnapshotExport()
-} else if mode == "incremental" {
-    PerformIncrementalExport()
-} else {
-    writeToStdError(str: "the mode: \(mode) is not supported. please choose snapshot or incremental")
-    exit(EXIT_FAILURE)
-}
 
 exit(EXIT_SUCCESS)
